@@ -1,5 +1,6 @@
 import streamlit as st
 import numpy as np
+import plotly.graph_objects as go
 
 from distributions import (
     weibull_pdf, weibull_cdf, weibull_sf, weibull_hazard,
@@ -13,41 +14,34 @@ st.set_page_config(
     layout="wide"
 )
 
-# Load custom CSS
-with open("style.css") as f:
-    st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
-
-st.title("Sine–Type II Half-Logistic Weibull Distribution")
-st.write("Explore PDF, CDF, Survival, and Hazard functions interactively")
-
-st.markdown("""
-**Model Definition**
-
-\\[
-F(x) = \\sin\\left( \\frac{\\pi}{2}
-\\frac{G(x)^\\alpha}{G(x)^\\alpha + (1-G(x))^\\alpha}
-\\right),
-\\quad G(x) = 1 - e^{-(x/\\lambda)^k}
-\\]
-
-This interface allows real-time sensitivity analysis of all parameters.
+# ===== Sidebar =====
+st.sidebar.title("STIIHL Weibull Explorer")
+st.sidebar.markdown("""
+Explore PDF, CDF, Survival, and Hazard functions interactively.
+Adjust the parameters below and observe how the distribution changes.
 """)
 
-
-# =========================
-# SIDEBAR PARAMETERS
-# =========================
-st.sidebar.header("Model Parameters")
+# Model parameters
 lam = st.sidebar.slider("Scale λ", 0.5, 5.0, 1.0, 0.1)
 k = st.sidebar.slider("Shape k", 0.5, 5.0, 1.5, 0.1)
 alpha = st.sidebar.slider("TIIHL α", 0.1, 5.0, 1.0, 0.1)
 
-x = np.linspace(0.001, 6*lam, 1000)
-
-# Distribution choice
 dist_choice = st.sidebar.radio("Distribution", ["Base Weibull", "STIIHL Weibull"])
 
-# Compute curves
+# ===== Main Title & Formula =====
+st.title("Sine–Type II Half-Logistic Weibull Distribution")
+
+st.subheader("Model Definition")
+st.latex(r"""
+F(x) = \sin\left( \frac{\pi}{2} 
+\frac{G(x)^\alpha}{G(x)^\alpha + (1-G(x))^\alpha} \right), \quad
+G(x) = 1 - e^{-(x/\lambda)^k}
+""")
+st.write("This interface allows real-time sensitivity analysis of all parameters.")
+
+# ===== Compute distribution =====
+x = np.linspace(0.001, 6*lam, 1000)
+
 if dist_choice == "Base Weibull":
     pdf = weibull_pdf(x, lam, k)
     cdf = weibull_cdf(x, lam, k)
@@ -59,36 +53,28 @@ else:
     sf = stiiHLW_sf(x, lam, k, alpha)
     hz = stiiHLW_hazard(x, lam, k, alpha)
 
-# =========================
-# NUMERICAL MOMENTS
-# =========================
-
-mean_val = np.trapezoid(x * pdf, x)
-var_val  = np.trapezoid((x - mean_val)**2 * pdf, x)
+# ===== Summary Metrics =====
+mean_val = np.trapz(x * pdf, x)
+var_val  = np.trapz((x - mean_val)**2 * pdf, x)
 std_val  = np.sqrt(var_val)
 
-# =========================
-# METRICS DISPLAY
-# =========================
-
 st.subheader("Distribution Summary Statistics")
+col1, col2, col3 = st.columns(3)
 
-c1, c2, c3 = st.columns(3)
+col1.metric("Mean", f"{mean_val:.4f}")
+col2.metric("Variance", f"{var_val:.4f}")
+col3.metric("Std Deviation", f"{std_val:.4f}")
 
-c1.metric("Mean", f"{mean_val:.4f}")
-c2.metric("Variance", f"{var_val:.4f}")
-c3.metric("Std. Deviation", f"{std_val:.4f}")
-
-
-# =========================
-# PLOTS IN TWO ROWS
-# =========================
+# ===== Tabs for Plots =====
 st.subheader("Distribution Curves")
+tab_pdf, tab_cdf, tab_sf, tab_hz = st.tabs([
+    "Probability Density Function",
+    "Cumulative Distribution Function",
+    "Survival Function",
+    "Hazard Function"
+])
 
-row1_col1, row1_col2 = st.columns(2)
-row2_col1, row2_col2 = st.columns(2)
-
-row1_col1.plotly_chart(plot_curve(x, pdf, "Probability Density Function", "f(x)"), use_container_width=True)
-row1_col2.plotly_chart(plot_curve(x, cdf, "Cumulative Distribution Function", "F(x)"), use_container_width=True)
-row2_col1.plotly_chart(plot_curve(x, sf, "Survival Function", "S(x)"), use_container_width=True)
-row2_col2.plotly_chart(plot_curve(x, hz, "Hazard Function", "h(x)"), use_container_width=True)
+tab_pdf.plotly_chart(plot_curve(x, pdf, "Probability Density Function", "f(x)"), use_container_width=True)
+tab_cdf.plotly_chart(plot_curve(x, cdf, "Cumulative Distribution Function", "F(x)"), use_container_width=True)
+tab_sf.plotly_chart(plot_curve(x, sf, "Survival Function", "S(x)"), use_container_width=True)
+tab_hz.plotly_chart(plot_curve(x, hz, "Hazard Function", "h(x)"), use_container_width=True)
