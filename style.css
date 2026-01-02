@@ -1,0 +1,89 @@
+
+/* =========================
+   GLOBAL APP STYLE
+========================= */
+
+html, body, [class*="css"] {
+    font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background-color: #f7f9fc;
+}
+
+/* =========================
+   MAIN TITLE
+========================= */
+
+h1 {
+    color: #0b3c5d;
+    font-weight: 700;
+    text-align: center;
+}
+
+h2, h3 {
+    color: #1f4e79;
+    font-weight: 600;
+}
+
+/* =========================
+   SIDEBAR
+========================= */
+
+section[data-testid="stSidebar"] {
+    background-color: #0b3c5d;
+}
+
+section[data-testid="stSidebar"] h1,
+section[data-testid="stSidebar"] h2,
+section[data-testid="stSidebar"] h3,
+section[data-testid="stSidebar"] label {
+    color: #ffffff;
+}
+
+/* =========================
+   SLIDERS
+========================= */
+
+.stSlider > div > div {
+    color: #0b3c5d;
+}
+
+/* =========================
+   METRIC / INFO BOXES
+========================= */
+
+div[data-testid="stMetric"] {
+    background-color: #ffffff;
+    border-radius: 12px;
+    padding: 12px;
+    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+/* =========================
+   PLOT CONTAINERS
+========================= */
+
+.stPlotlyChart {
+    background-color: #ffffff;
+    border-radius: 14px;
+    padding: 8px;
+    box-shadow: 0px 6px 18px rgba(0, 0, 0, 0.06);
+}
+
+/* =========================
+   RADIO BUTTONS
+========================= */
+
+.stRadio > label {
+    font-weight: 600;
+}
+
+/* =========================
+   FOOTER CLEANUP
+========================= */
+
+footer {
+    visibility: hidden;
+}
+
+header {
+    visibility: hidden;
+}
