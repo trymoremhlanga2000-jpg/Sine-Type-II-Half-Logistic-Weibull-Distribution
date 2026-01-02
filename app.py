@@ -1,6 +1,7 @@
 import streamlit as st
 import numpy as np
 import plotly.graph_objects as go
+from scipy.integrate import trapezoid
 
 from distributions import (
     weibull_pdf, weibull_cdf, weibull_sf, weibull_hazard,
@@ -54,9 +55,9 @@ else:
     hz = stiiHLW_hazard(x, lam, k, alpha)
 
 # ===== Summary Metrics =====
-mean_val = np.trapz(x * pdf, x)
-var_val  = np.trapz((x - mean_val)**2 * pdf, x)
-std_val  = np.sqrt(var_val)
+mean_val = trapezoid(x * pdf, x)
+var_val  = trapezoid((x - mean_val)**2 * pdf, x)
+std_val  = trapezoid(var_val)
 
 st.subheader("Distribution Summary Statistics")
 col1, col2, col3 = st.columns(3)
