@@ -20,6 +20,20 @@ with open("style.css") as f:
 st.title("Sine–Type II Half-Logistic Weibull Distribution")
 st.write("Explore PDF, CDF, Survival, and Hazard functions interactively")
 
+st.markdown("""
+**Model Definition**
+
+\\[
+F(x) = \\sin\\left( \\frac{\\pi}{2}
+\\frac{G(x)^\\alpha}{G(x)^\\alpha + (1-G(x))^\\alpha}
+\\right),
+\\quad G(x) = 1 - e^{-(x/\\lambda)^k}
+\\]
+
+This interface allows real-time sensitivity analysis of all parameters.
+""")
+
+
 # =========================
 # SIDEBAR PARAMETERS
 # =========================
@@ -46,15 +60,25 @@ else:
     hz = stiiHLW_hazard(x, lam, k, alpha)
 
 # =========================
-# METRICS
+# NUMERICAL MOMENTS
 # =========================
-mean_val = np.trapz(x * pdf, x)
-max_pdf = max(pdf)
 
-col1, col2, col3 = st.columns(3)
-col1.metric("Mean (Approx.)", f"{mean_val:.3f}")
-col2.metric("Max PDF Value", f"{max_pdf:.3f}")
-col3.metric("Scale λ", f"{lam:.2f}")
+mean_val = np.trapezoid(x * pdf, x)
+var_val  = np.trapezoid((x - mean_val)**2 * pdf, x)
+std_val  = np.sqrt(var_val)
+
+# =========================
+# METRICS DISPLAY
+# =========================
+
+st.subheader("Distribution Summary Statistics")
+
+c1, c2, c3 = st.columns(3)
+
+c1.metric("Mean", f"{mean_val:.4f}")
+c2.metric("Variance", f"{var_val:.4f}")
+c3.metric("Std. Deviation", f"{std_val:.4f}")
+
 
 # =========================
 # PLOTS IN TWO ROWS

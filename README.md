@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 # Sine–Type II Half-Logistic Weibull Distribution (STIIHLW)
 
 ## Overview
@@ -38,10 +38,5 @@ This layered construction yields a highly flexible distribution capable of model
 - Side-by-side comparison between:
   - Base Weibull distribution
   - Sine–Type II Half-Logistic Weibull distribution
-- Publication-quality plots using Plotly
-- Modular, extensible Python codebase
 
-=======
-# Sine-Type-II-Half-Logistic-Weibull-Distribution
-A Streamlit-based interactive framework for exploring the Weibull, Type II Half-Logistic Weibull, and Sine–Type II Half-Logistic Weibull distributions with real-time visualization of PDF, CDF, survival, and hazard functions.
->>>>>>> 1bf8caa976c0ccdbe1828967d0bc302580accb96
+
