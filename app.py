@@ -57,7 +57,7 @@ else:
 # ===== Summary Metrics =====
 mean_val = trapezoid(x * pdf, x)
 var_val  = trapezoid((x - mean_val)**2 * pdf, x)
-std_val  = trapezoid(var_val)
+std_val  = np.sqrt(var_val)
 
 st.subheader("Distribution Summary Statistics")
 col1, col2, col3 = st.columns(3)
