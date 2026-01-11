@@ -100,6 +100,10 @@ All plots shown below are generated directly from the implemented STIIHLW model.
 - Matplotlib / Plotly  
 - Git and GitHub
 
+##Live Application
+
+https://sine-type-ii-half-logistic-weibull-distribution-trymoremhlang.streamlit.app/
+
 
 ## 👤 Author
 

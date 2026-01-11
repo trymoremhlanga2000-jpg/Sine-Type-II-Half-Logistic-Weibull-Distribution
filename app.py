@@ -21,7 +21,7 @@ from plots import plot_curve, plot_comparison, plot_histogram_with_fit, plot_qq
 # PAGE CONFIGURATION
 # =============================
 st.set_page_config(
-    page_title="DistroElite | STIIHL Weibull Analyzer",
+    page_title="Trymore's STIIHL Weibull Analyzer",
     page_icon="💎",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -335,8 +335,8 @@ apply_premium_theme()
 # =============================
 # SIDEBAR NAVIGATION
 # =============================
-st.sidebar.markdown("<h2 style='text-align: center;'>💎 DistroElite</h2>", unsafe_allow_html=True)
-st.sidebar.markdown("<div style='text-align: center; color: rgba(245, 199, 122, 0.7); margin-bottom: 30px;'>ADVANCED DISTRIBUTION ANALYTICS</div>", unsafe_allow_html=True)
+st.sidebar.markdown("<h2 style='text-align: center;'>💎 TryieDataMagic</h2>", unsafe_allow_html=True)
+st.sidebar.markdown("<div style='text-align: center; color: rgba(245, 199, 122, 0.7); margin-bottom: 30px;'>DISTRIBUTION ANALYTICS</div>", unsafe_allow_html=True)
 
 page = st.sidebar.radio(
     "NAVIGATION",
@@ -357,12 +357,12 @@ if page == "🏠 Dashboard":
     col1, col2, col3 = st.columns([2, 1, 1])
     
     with col1:
-        st.markdown("<h1>DISTROELITE INTELLIGENCE</h1>", unsafe_allow_html=True)
+        st.markdown("<h1>TRYIE INTELLIGENCE</h1>", unsafe_allow_html=True)
         st.markdown("""
         <div style='color: rgba(245, 199, 122, 0.8); font-size: 18px; line-height: 1.6;'>
-        Advanced analytical platform for the Sine–Type II Half-Logistic Weibull distribution.
-        A novel statistical distribution combining Weibull resilience with sine-generated flexibility
-        for superior modeling of real-world phenomena.
+        An analytical platform for the Sine–Type II Half-Logistic Weibull distribution.
+        A statistical distribution combining Weibull resilience with sine-generated flexibility
+        for superior modeling of real-world phenomena and half logistic families behavior towards tails.
         </div>
         """, unsafe_allow_html=True)
     
@@ -376,13 +376,13 @@ if page == "🏠 Dashboard":
     
     # Key Features
     st.markdown("<div class='card'>", unsafe_allow_html=True)
-    st.markdown("<h2>✨ Premium Features</h2>", unsafe_allow_html=True)
+    st.markdown("<h2>✨ Features</h2>", unsafe_allow_html=True)
     
     col1, col2 = st.columns(2)
     
     with col1:
         st.markdown("<div class='analysis-card'>", unsafe_allow_html=True)
-        st.markdown("### 📊 Interactive Distribution Explorer")
+        st.markdown("### 📊 Interactive Distribution Analysis")
         st.markdown("""
         • Real-time parameter sensitivity analysis  
         • PDF, CDF, Survival & Hazard functions  
@@ -469,7 +469,7 @@ if page == "🏠 Dashboard":
         </div>
         
         This distribution combines the flexibility of Weibull with the smoothing properties
-        of sine transformation, making it ideal for reliability engineering, survival analysis,
+        of sine transformation and tail behavior of half logistic families, making it ideal for reliability engineering, survival analysis,
         and financial risk modeling.
         </div>
         """, unsafe_allow_html=True)
@@ -1865,7 +1865,7 @@ elif page == "📚 Documentation":
         
         ### Recent Advances
         
-        9. **Mhlanga, T. (2024).** *Sine–Type II Half-Logistic Weibull Distribution: Theory and Applications.*
+        9. **Mhlanga, T. (2026).** *Sine–Type II Half-Logistic Weibull Distribution: Theory and Applications.*
            Journal of Statistical Distributions and Applications (Submitted).
         
         10. **Recent reviews on transformed distributions** in:
@@ -1980,6 +1980,6 @@ elif page == "⚙️ System":
 # FOOTER
 # =============================
 st.markdown(
-    "<div class='footer'>DistroElite Analytics | Advanced Statistical Intelligence © 2024</div>",
+    "<div class='footer'>Trymore Mhlanga Analytics | Statistical Intelligence © 2026</div>",
     unsafe_allow_html=True
 )
