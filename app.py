@@ -7,12 +7,14 @@ import io
 import base64
 from datetime import datetime
 
+# Import from local modules
 from distributions import (
     weibull_pdf, weibull_cdf, weibull_sf, weibull_hazard,
     stiiHLW_pdf, stiiHLW_cdf, stiiHLW_sf, stiiHLW_hazard,
     mle_stiiHLW, goodness_of_fit, generate_stiiHLW_samples,
     stiiHLW_quantile
 )
+
 from plots import plot_curve, plot_comparison, plot_histogram_with_fit, plot_qq
 
 # =============================
@@ -306,6 +308,25 @@ def apply_premium_theme():
         border: 1px solid rgba(245, 199, 122, 0.2) !important;
         border-radius: 12px !important;
     }
+    
+    /* CUSTOM SCROLLBAR */
+    ::-webkit-scrollbar {
+        width: 10px;
+    }
+    
+    ::-webkit-scrollbar-track {
+        background: rgba(20, 20, 20, 0.5);
+        border-radius: 10px;
+    }
+    
+    ::-webkit-scrollbar-thumb {
+        background: linear-gradient(180deg, #f5c77a, #d4a94e);
+        border-radius: 10px;
+    }
+    
+    ::-webkit-scrollbar-thumb:hover {
+        background: linear-gradient(180deg, #ffd98e, #f5c77a);
+    }
     </style>
     """, unsafe_allow_html=True)
 
@@ -518,12 +539,8 @@ elif page == "📊 Distribution Explorer":
             help="Choose distribution to analyze"
         )
         
-        x_range = st.slider(
-            "X-axis Range",
-            0.0, 20.0, (0.0, 10.0),
-            step=0.1,
-            help="Range for x-values in plots"
-        )
+        x_range_min = st.number_input("X-axis Min", 0.0, 20.0, 0.0, 0.1)
+        x_range_max = st.number_input("X-axis Max", 0.0, 50.0, 10.0, 0.1)
         
         st.markdown("</div>", unsafe_allow_html=True)
     
@@ -531,7 +548,7 @@ elif page == "📊 Distribution Explorer":
     st.markdown("<h3>🧮 Distribution Functions</h3>", unsafe_allow_html=True)
     
     # Compute x values
-    x = np.linspace(max(0.001, x_range[0]), x_range[1], 1000)
+    x = np.linspace(max(0.001, x_range_min), x_range_max, 1000)
     
     # Compute distributions
     if dist_choice == "Base Weibull":
@@ -572,26 +589,29 @@ elif page == "📊 Distribution Explorer":
     
     # Summary Statistics
     if dist_choice != "Comparison":
-        mean_val = trapezoid(x * pdf, x)
-        var_val = trapezoid((x - mean_val)**2 * pdf, x)
-        std_val = np.sqrt(var_val)
-        skewness = trapezoid(((x - mean_val)/std_val)**3 * pdf, x)
-        kurtosis = trapezoid(((x - mean_val)/std_val)**4 * pdf, x) - 3
-        
-        st.markdown("<h4>📈 Distribution Moments</h4>", unsafe_allow_html=True)
-        
-        col1, col2, col3, col4, col5 = st.columns(5)
-        
-        with col1:
-            st.metric("Mean", f"{mean_val:.4f}")
-        with col2:
-            st.metric("Variance", f"{var_val:.4f}")
-        with col3:
-            st.metric("Std Dev", f"{std_val:.4f}")
-        with col4:
-            st.metric("Skewness", f"{skewness:.4f}")
-        with col5:
-            st.metric("Kurtosis", f"{kurtosis:.4f}")
+        try:
+            mean_val = trapezoid(x * pdf, x)
+            var_val = trapezoid((x - mean_val)**2 * pdf, x)
+            std_val = np.sqrt(var_val)
+            skewness = trapezoid(((x - mean_val)/std_val)**3 * pdf, x)
+            kurtosis = trapezoid(((x - mean_val)/std_val)**4 * pdf, x) - 3
+            
+            st.markdown("<h4>📈 Distribution Moments</h4>", unsafe_allow_html=True)
+            
+            col1, col2, col3, col4, col5 = st.columns(5)
+            
+            with col1:
+                st.metric("Mean", f"{mean_val:.4f}")
+            with col2:
+                st.metric("Variance", f"{var_val:.4f}")
+            with col3:
+                st.metric("Std Dev", f"{std_val:.4f}")
+            with col4:
+                st.metric("Skewness", f"{skewness:.4f}")
+            with col5:
+                st.metric("Kurtosis", f"{kurtosis:.4f}")
+        except:
+            st.warning("Could not calculate moments for this parameter combination.")
     
     # Function Plots
     st.markdown("<h4>📊 Function Visualizations</h4>", unsafe_allow_html=True)
@@ -734,7 +754,10 @@ elif page == "📊 Distribution Explorer":
                             q = stiiHLW_quantile(p, lam, k, alpha)
                         else:
                             q = lam * (-np.log(1-p))**(1/k)
-                        st.metric(f"{int(p*100)}th Percentile", f"{q:.4f}")
+                        if not np.isnan(q):
+                            st.metric(f"{int(p*100)}th Percentile", f"{q:.4f}")
+                        else:
+                            st.metric(f"{int(p*100)}th Percentile", "N/A")
     
     # Parameter Sensitivity Analysis
     st.markdown("<h4>🎯 Parameter Sensitivity Analysis</h4>", unsafe_allow_html=True)
@@ -756,11 +779,10 @@ elif page == "📊 Distribution Explorer":
         )
     
     with col3:
-        num_variations = st.slider("Number of Variations", 3, 10, 5)
+        num_variations = st.slider("Number of Variations", 3, 10, 5, key="num_variations")
     
     # Generate parameter variations
     if param_to_vary == "Scale λ":
-        base_params = {'lam': lam, 'k': k, 'alpha': alpha}
         if variation_type == "Linear":
             lam_values = np.linspace(lam * 0.5, lam * 2, num_variations)
         elif variation_type == "Exponential":
@@ -779,7 +801,6 @@ elif page == "📊 Distribution Explorer":
             ))
     
     elif param_to_vary == "Shape k":
-        base_params = {'lam': lam, 'k': k, 'alpha': alpha}
         if variation_type == "Linear":
             k_values = np.linspace(k * 0.5, k * 2, num_variations)
         elif variation_type == "Exponential":
@@ -798,7 +819,6 @@ elif page == "📊 Distribution Explorer":
             ))
     
     else:  # TIIHL α
-        base_params = {'lam': lam, 'k': k, 'alpha': alpha}
         if variation_type == "Linear":
             alpha_values = np.linspace(alpha * 0.5, alpha * 2, num_variations)
         elif variation_type == "Exponential":
@@ -875,18 +895,18 @@ elif page == "🔬 Statistical Analysis":
         col1, col2, col3, col4 = st.columns(4)
         
         with col1:
-            n_samples = st.number_input("Sample Size", 10, 10000, 1000)
+            n_samples = st.number_input("Sample Size", 10, 10000, 1000, key="gen_n_samples")
         
         with col2:
-            gen_lam = st.number_input("True λ", 0.1, 10.0, 1.0, 0.1)
+            gen_lam = st.number_input("True λ", 0.1, 10.0, 1.0, 0.1, key="gen_lam")
         
         with col3:
-            gen_k = st.number_input("True k", 0.1, 5.0, 1.5, 0.1)
+            gen_k = st.number_input("True k", 0.1, 5.0, 1.5, 0.1, key="gen_k")
         
         with col4:
-            gen_alpha = st.number_input("True α", 0.1, 5.0, 1.0, 0.1)
+            gen_alpha = st.number_input("True α", 0.1, 5.0, 1.0, 0.1, key="gen_alpha")
         
-        if st.button("🎲 Generate Synthetic Dataset", use_container_width=True):
+        if st.button("🎲 Generate Synthetic Dataset", use_container_width=True, key="gen_data_btn"):
             with st.spinner("Generating synthetic data..."):
                 data = generate_stiiHLW_samples(n_samples, gen_lam, gen_k, gen_alpha)
                 st.session_state.generated_data = data
@@ -898,7 +918,8 @@ elif page == "🔬 Statistical Analysis":
         uploaded_file = st.file_uploader(
             "📤 Upload CSV or TXT file",
             type=['csv', 'txt', 'xlsx'],
-            help="Upload your dataset (single column of numerical values)"
+            help="Upload your dataset (single column of numerical values)",
+            key="stat_upload"
         )
         
         if uploaded_file is not None:
@@ -985,7 +1006,7 @@ elif page == "🔬 Statistical Analysis":
             st.markdown("##### 📊 Goodness-of-Fit Statistics")
             
             # Use MLE parameters if available, else use default
-            if 'mle_params' not in locals():
+            if 'lam_mle' not in locals():
                 lam_mle, k_mle, alpha_mle = mle_stiiHLW(data)
             
             gof_results = goodness_of_fit(data, lam_mle, k_mle, alpha_mle)
@@ -1052,9 +1073,9 @@ elif page == "🔬 Statistical Analysis":
             st.markdown("<div class='analysis-card'>", unsafe_allow_html=True)
             st.markdown("##### 📐 Bootstrap Confidence Intervals")
             
-            n_bootstrap = st.slider("Bootstrap Samples", 100, 5000, 1000)
+            n_bootstrap = st.slider("Bootstrap Samples", 100, 5000, 1000, key="bootstrap_n")
             
-            if st.button("🔄 Compute Bootstrap CIs", use_container_width=True):
+            if st.button("🔄 Compute Bootstrap CIs", use_container_width=True, key="bootstrap_btn"):
                 with st.spinner(f"Running {n_bootstrap} bootstrap samples..."):
                     bootstrap_params = []
                     for _ in range(n_bootstrap):
@@ -1098,7 +1119,7 @@ elif page == "🔬 Statistical Analysis":
         # Report Generation
         st.markdown("<h4>📄 Analysis Report</h4>", unsafe_allow_html=True)
         
-        if st.button("📥 Generate Comprehensive Report", use_container_width=True):
+        if st.button("📥 Generate Comprehensive Report", use_container_width=True, key="report_btn"):
             # Create report content
             report_content = f"""
             STIIHL Weibull Distribution Analysis Report
@@ -1138,7 +1159,7 @@ elif page == "🔬 Statistical Analysis":
             
             # Create download link
             b64 = base64.b64encode(report_content.encode()).decode()
-            href = f'<a href="data:file/txt;base64,{b64}" download="stiihl_analysis_report.txt" style="text-decoration: none;">📥 Download Analysis Report</a>'
+            href = f'<a href="data:file/txt;base64,{b64}" download="stiihl_analysis_report.txt" style="text-decoration: none;"><button style="background: linear-gradient(135deg, #f5c77a 0%, #ffd98e 100%); color: #0a0a0a; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%;">📥 Download Analysis Report</button></a>'
             st.markdown(href, unsafe_allow_html=True)
     
     else:
@@ -1147,7 +1168,8 @@ elif page == "🔬 Statistical Analysis":
     st.markdown("</div>", unsafe_allow_html=True)
 
 # =============================
-# DATA FITTING PAGE (Continued in next message due to length)
+# DATA FITTING PAGE
+# =============================
 elif page == "📈 Data Fitting":
     st.markdown("<div class='card'>", unsafe_allow_html=True)
     st.markdown("<h1>📈 REAL-TIME DATA FITTING</h1>", unsafe_allow_html=True)
@@ -1166,7 +1188,8 @@ elif page == "📈 Data Fitting":
     uploaded_file = st.file_uploader(
         "Choose a CSV, TXT, or Excel file",
         type=['csv', 'txt', 'xlsx', 'xls'],
-        help="Upload your dataset (numerical values in one column)"
+        help="Upload your dataset (numerical values in one column)",
+        key="fit_upload"
     )
     
     if uploaded_file is not None:
@@ -1353,13 +1376,13 @@ elif page == "📈 Data Fitting":
                         
                         csv_params = params_df.to_csv(index=False)
                         b64_params = base64.b64encode(csv_params.encode()).decode()
-                        href_params = f'<a href="data:file/csv;base64,{b64_params}" download="stiihl_parameters.csv" style="text-decoration: none;"><button style="background: linear-gradient(135deg, #f5c77a 0%, #ffd98e 100%); color: #0a0a0a; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer;">📥 Download Parameters</button></a>'
+                        href_params = f'<a href="data:file/csv;base64,{b64_params}" download="stiihl_parameters.csv" style="text-decoration: none;"><button style="background: linear-gradient(135deg, #f5c77a 0%, #ffd98e 100%); color: #0a0a0a; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%;">📥 Download Parameters</button></a>'
                         st.markdown(href_params, unsafe_allow_html=True)
                     
                     with col2:
                         # Generate prediction
                         st.markdown("##### 🔮 Make Predictions")
-                        percentile = st.slider("Percentile", 0.01, 0.99, 0.95, 0.01)
+                        percentile = st.slider("Percentile", 0.01, 0.99, 0.95, 0.01, key="pred_percentile")
                         predicted_value = stiiHLW_quantile(percentile, lam_fit, k_fit, alpha_fit)
                         st.metric(f"{int(percentile*100)}th Percentile", f"{predicted_value:.4f}")
                 
@@ -1376,6 +1399,7 @@ elif page == "📈 Data Fitting":
 
 # =============================
 # MONTE CARLO SIMULATION PAGE
+# =============================
 elif page == "🧪 Monte Carlo Simulation":
     st.markdown("<div class='card'>", unsafe_allow_html=True)
     st.markdown("<h1>🧪 MONTE CARLO SIMULATION</h1>", unsafe_allow_html=True)
@@ -1402,21 +1426,22 @@ elif page == "🧪 Monte Carlo Simulation":
         sim_alpha = st.number_input("TIIHL α", 0.1, 5.0, 1.0, 0.1, key="sim_alpha")
     
     with col4:
-        n_simulations = st.number_input("Simulations", 100, 100000, 1000, 100)
+        n_simulations = st.number_input("Simulations", 100, 100000, 1000, 100, key="n_simulations")
     
     col1, col2 = st.columns(2)
     
     with col1:
-        n_samples = st.number_input("Samples per Simulation", 10, 10000, 100, 10)
+        n_samples = st.number_input("Samples per Simulation", 10, 10000, 100, 10, key="n_samples_per_sim")
     
     with col2:
         simulation_type = st.selectbox(
             "Simulation Type",
-            ["Risk Assessment", "Reliability Analysis", "Parameter Uncertainty", "Custom"]
+            ["Risk Assessment", "Reliability Analysis", "Parameter Uncertainty", "Custom"],
+            key="sim_type"
         )
     
     # Run Simulation
-    if st.button("🚀 Run Monte Carlo Simulation", use_container_width=True):
+    if st.button("🚀 Run Monte Carlo Simulation", use_container_width=True, key="run_sim_btn"):
         with st.spinner(f"Running {n_simulations} Monte Carlo simulations..."):
             # Generate simulations
             simulations = []
@@ -1476,21 +1501,6 @@ elif page == "🧪 Monte Carlo Simulation":
                 name='Distribution of Sample Means'
             ))
             
-            # Add theoretical mean
-            theoretical_mean = trapezoid(
-                np.linspace(0, 20, 1000) * 
-                stiiHLW_pdf(np.linspace(0, 20, 1000), sim_lam, sim_k, sim_alpha),
-                np.linspace(0, 20, 1000)
-            )
-            
-            fig_means.add_vline(
-                x=theoretical_mean,
-                line_dash="dash",
-                line_color="#ef4444",
-                annotation_text=f"Theoretical Mean: {theoretical_mean:.4f}",
-                annotation_position="top right"
-            )
-            
             fig_means.update_layout(
                 title="Distribution of Sample Means",
                 xaxis_title='Sample Mean',
@@ -1537,7 +1547,7 @@ elif page == "🧪 Monte Carlo Simulation":
             # Risk assessment: probability of exceeding threshold
             st.markdown("##### ⚠️ Risk Assessment")
             
-            threshold = st.slider("Threshold Value", 0.0, 20.0, 5.0, 0.1)
+            threshold = st.slider("Threshold Value", 0.0, 20.0, 5.0, 0.1, key="risk_threshold")
             
             # Calculate exceedance probability
             exceedance_probs = []
@@ -1584,7 +1594,7 @@ elif page == "🧪 Monte Carlo Simulation":
         # Export Results
         st.markdown("<h4>💾 Export Simulation Results</h4>", unsafe_allow_html=True)
         
-        if st.button("📥 Download Simulation Summary", use_container_width=True):
+        if st.button("📥 Download Simulation Summary", use_container_width=True, key="download_sim_btn"):
             # Create summary DataFrame
             summary_df = pd.DataFrame({
                 'Statistic': ['Mean_of_Means', 'Std_of_Means', 'Mean_Std_Dev', 
@@ -1862,18 +1872,6 @@ elif page == "📚 Documentation":
             - Journal of Statistical Computation and Simulation
             - Communications in Statistics - Theory and Methods
             - Computational Statistics & Data Analysis
-        
-        ### Software Implementation
-        
-        11. **Python libraries for statistical distributions:**
-            - SciPy: https://docs.scipy.org/doc/scipy/reference/stats.html
-            - NumPy: https://numpy.org/doc/stable/reference/random/generator.html
-            - Statsmodels: https://www.statsmodels.org/stable/index.html
-        
-        12. **R packages for distribution analysis:**
-            - fitdistrplus
-            - actuar
-            - fiddist
         """)
     
     st.markdown("</div>", unsafe_allow_html=True)
@@ -1898,15 +1896,15 @@ elif page == "⚙️ System":
         **Architecture:** Modular Python
         
         **Core Dependencies:**
-        - streamlit 1.28.0+
-        - numpy 1.24.0+
-        - pandas 2.0.0+
-        - plotly 5.15.0+
-        - scipy 1.11.0+
+        - streamlit 1.52.2+
+        - numpy 2.4.1+
+        - pandas 2.3.3+
+        - plotly 6.5.1+
+        - scipy 1.17.0+
         """)
         
-        st.metric("Python Version", "3.9+")
-        st.metric("Streamlit Version", "1.28.0")
+        st.metric("Python Version", "3.13.11")
+        st.metric("Streamlit Version", "1.52.2")
         st.markdown("</div>", unsafe_allow_html=True)
         
         st.markdown("<div class='analysis-card'>", unsafe_allow_html=True)
