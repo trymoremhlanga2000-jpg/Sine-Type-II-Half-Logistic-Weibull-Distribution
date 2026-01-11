@@ -1970,8 +1970,8 @@ elif page == "⚙️ System":
     
     st.markdown("<div style='text-align: center; padding: 30px;'>", unsafe_allow_html=True)
     st.markdown("<h3>Developed by Trymore Mhlanga</h3>", unsafe_allow_html=True)
-    st.markdown("<div style='color: rgba(245, 199, 122, 0.7);'>DistroElite Analytics v1.0 | STIIHL Weibull Distribution</div>", unsafe_allow_html=True)
-    st.markdown("<div style='color: rgba(245, 199, 122, 0.5); font-size: 14px; margin-top: 10px;'>© 2024 All Rights Reserved</div>", unsafe_allow_html=True)
+    st.markdown("<div style='color: rgba(245, 199, 122, 0.7);'>TM Analytics v1.0 | STIIHL Weibull Distribution</div>", unsafe_allow_html=True)
+    st.markdown("<div style='color: rgba(245, 199, 122, 0.5); font-size: 14px; margin-top: 10px;'>© 2026 All Rights Reserved</div>", unsafe_allow_html=True)
     st.markdown("</div>", unsafe_allow_html=True)
     
     st.markdown("</div>", unsafe_allow_html=True)
